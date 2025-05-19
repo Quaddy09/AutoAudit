@@ -19,7 +19,10 @@
 - ReportLab
 
 ## 🚀 Run Locally
-
 ```bash
 pip install -r requirements.txt
 streamlit run main.py
+```
+
+Or if you fancy the web click on the link below:
+https://governingitaud.streamlit.app
