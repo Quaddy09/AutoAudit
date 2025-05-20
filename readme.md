@@ -1,25 +1,23 @@
-# 🔍 AutoAudit – IT Audit Automation Toolkit
+# 🔐 AutoAudit – IT Audit Automation Toolkit
 
-**AutoAudit** is a cybersecurity-themed audit automation app that:
-- Reads Excel-based audit checklists
-- Assigns risk scores to controls
-- Generates professional PDF & CSV reports
-- Provides a simple UI for auditors or students
+AutoAudit helps IT teams **quickly** turn Excel‑based checklists into risk insights.  
+Upload your audit template, score controls, and export CSV/PDF reports—all in one click.
 
-## 🧪 Features
-- 📄 Excel import (checklist format)
-- 📊 Risk scoring (Low, Medium, High)
-- 📥 Export to CSV and PDF
-- 🔐 Simple password access (demo only)
+---
 
-## 📦 Tech Stack
-- Python
-- Streamlit
-- Pandas
-- ReportLab
+## 🚀 Features
 
-## 🚀 Run Locally
+- ✅ **Excel Import** (your custom audit template)  
+- 📊 **Risk Scoring** (Low / Medium / High)  
+- 📥 **Download** CSV & PDF  
+- 🔒 **Password Protection** (demo)  
+- ⚡ **Built with Streamlit** for lightning-fast UI  
 
-```bash
-pip install -r requirements.txt
-streamlit run main.py
+---
+
+## 📂 Usage
+
+1. **Clone**  
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/AutoAudit.git
+   cd AutoAudit

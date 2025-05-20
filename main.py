@@ -1,44 +1,81 @@
-# main.py
-
 import streamlit as st
-from modules.audit_checklist import load_controls
-from modules.risk_scoring import assign_risk_scores
-from modules.report_generator import generate_pdf_report
+import pandas as pd
+from io import BytesIO
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
 
-st.set_page_config(page_title="AutoAudit - IT Audit Automation", layout="wide")
+# ──────────────────────────────────────────────────
+# App Title and Description
+# ──────────────────────────────────────────────────
+st.set_page_config(page_title="AutoAudit - IT Risk Audit Tool", layout="wide")
+st.title("🛡️ AutoAudit – IT Audit Automation Toolkit")
+st.markdown("""
+Welcome to **AutoAudit**, a smart tool to help IT departments streamline internal audits.  
+Upload an Excel file using our [audit template](https://github.com/YOUR_USERNAME/AutoAudit/blob/main/sample-audit-template.xlsx) and get instant risk insights.
 
-st.title("AutoAudit 🛡️ - IT Audit Automation Toolkit")
+**Features:**
+- Maps control status to risk scores  
+- Displays risk levels: Low / Medium / High  
+- Exports results to CSV & PDF  
+- Simple password protection  
+""")
 
-uploaded_file = st.file_uploader("Upload your Audit Excel Checklist (.xlsx)", type="xlsx")
+# ──────────────────────────────────────────────────
+# Basic Authentication
+# ──────────────────────────────────────────────────
+PASSWORD = "secureaudit"
+if st.text_input("🔒 Enter password:", type="password") != PASSWORD:
+    st.warning("🔑 Incorrect password.")
+    st.stop()
 
+# ──────────────────────────────────────────────────
+# File Upload and Processing
+# ──────────────────────────────────────────────────
+uploaded_file = st.file_uploader("📂 Upload Audit Excel (.xlsx)", type="xlsx")
 if uploaded_file:
-    df = load_controls(uploaded_file)
-    if isinstance(df, str):
-        st.error(df)
-    else:
-        df_with_scores = assign_risk_scores(df)
-        st.subheader("Audit Checklist with Risk Scores")
-        st.dataframe(df_with_scores)
-        st.download_button(
-            "Download CSV",
-            df_with_scores.to_csv(index=False).encode("utf-8"),
-            file_name="audit_risk_report.csv",
-            mime="text/csv"
-        )
+    df = pd.read_excel(uploaded_file)
+    required = ['Control Domain', 'Control Name', 'Implementation Status']
+    if not all(col in df.columns for col in required):
+        st.error(f"Missing columns: {', '.join(required)}")
+        st.stop()
 
+    # Map status → score/level
+    status_map = {"Implemented": 1, "Partially Implemented": 2, "Not Implemented": 3}
+    level_map  = {1: "Low", 2: "Medium", 3: "High"}
+    df['Risk Score'] = df['Implementation Status'].map(status_map)
+    df['Risk Level'] = df['Risk Score'].map(level_map)
 
-        if st.button("Generate PDF Report"):
-            generate_pdf_report(df_with_scores)
-            with open("audit_report.pdf", "rb") as file:
-                st.download_button("Download PDF Report", file, file_name="audit_report.pdf")
-        low, med, high = (
-            df_with_scores["Risk Level"] == "Low").sum(), (
-            df_with_scores["Risk Level"] == "Medium").sum(), (
-            df_with_scores["Risk Level"] == "High").sum()
+    st.success("✅ Processed successfully!")
+    st.subheader("📊 Audit Results")
+    st.dataframe(df, use_container_width=True)
 
-        st.markdown("### 📊 Risk Summary")
-        col1, col2, col3 = st.columns(3)
-        col1.metric("🟢 Low Risk", low)
-        col2.metric("🟡 Medium Risk", med)
-        col3.metric("🔴 High Risk", high)
-        st.markdown("### 📈 Risk Distribution")
+    # Download CSV
+    csv = df.to_csv(index=False).encode('utf-8')
+    st.download_button("📥 Download CSV", csv, "AutoAudit_Report.csv", "text/csv")
+
+    # Download PDF
+    def make_pdf(df):
+        buf = BytesIO()
+        pdf = canvas.Canvas(buf, pagesize=letter)
+        w, h = letter
+        y = h - 30
+        pdf.setFont("Helvetica-Bold", 12)
+        pdf.drawString(30, y, "AutoAudit – Risk Audit Summary")
+        pdf.setFont("Helvetica", 10)
+        y -= 20
+        for _, row in df.iterrows():
+            line = (f"{row['Control Domain']} | {row['Control Name']} | "
+                    f"Status: {row['Implementation Status']} → {row['Risk Level']}")
+            pdf.drawString(30, y, line)
+            y -= 15
+            if y < 40:
+                pdf.showPage(); y = h - 30
+        pdf.save()
+        buf.seek(0)
+        return buf
+
+    pdf_buf = make_pdf(df)
+    st.download_button("📄 Download PDF", pdf_buf, "AutoAudit_Summary.pdf", "application/pdf")
+
+else:
+    st.info("🔍 Awaiting your upload…")
