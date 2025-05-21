@@ -1,7 +1,52 @@
-venv/
+# Byte-compiled / optimized / DLL files
 __pycache__/
-*.pyc
-.env
-*.db
-*.pdf
+*.py[cod]
+*$py.class
 
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+lib/
+lib64/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.cache
+*.cover
+
+# Pytest
+.pytest_cache/
+
+# mypy
+.mypy_cache/
+
+# Streamlit
+.streamlit/secrets.toml
+.streamlit/config.toml
+
+# VS Code
+.vscode/
+
+# Environment variables
+.env
+venv/
+.venv/
+
+# Logs and system files
+*.log
+.DS_Store
+Thumbs.db
+~$*.xlsx
